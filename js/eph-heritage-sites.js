@@ -458,7 +458,7 @@ function generateFilterSelect() {
   }
 }
 
-// Menghitung dinamis (Menghapus countYear karena fiturnya sudah diganti menjadi fungsi urut)
+// Gantilah seluruh fungsi updateFeatureCounts lama Anda dengan ini:
 function updateFeatureCounts() {
   let total = 0;
 
@@ -473,28 +473,37 @@ function updateFeatureCounts() {
       if (activeFeatures.has('article') && record.articleTitle === undefined) matchFeature = false;
     }
 
-    // Cek pencarian teks dengan keamanan ekstra (mencegah crash jika indexTitle kosong)
+    // Cek pencarian teks dengan keamanan ekstra
     let matchSearch = true;
-// === KODE BARU: Cek Filter Usia / Klaster ===
+    if (currentSearchQuery.trim() !== '') {
+      if (record.indexTitle) {
+        matchSearch = record.indexTitle.toLowerCase().includes(currentSearchQuery);
+      } else {
+        matchSearch = false;
+      }
+    }
+
+    // === Cek Filter Usia / Klaster ===
     let matchUsia = true;
     if (currentUsiaFilter === 'klaster_penting') {
       matchUsia = record.masukKlasterPenting === true;
     } 
     else if (currentUsiaFilter === 'usia_50') {
       if (record.rawTahunBerdiri) {
-        // Ambil 4 digit pertama (tahun) dan jadikan angka
         let tahunBangunan = parseInt(record.rawTahunBerdiri.substring(0, 4));
-        let batasTahun = new Date().getFullYear() - 50; // Dinamis & otomatis
+        let batasTahun = new Date().getFullYear() - 50; 
         matchUsia = tahunBangunan <= batasTahun;
       } else {
-        matchUsia = false; // Jika tidak ada data tahun, sembunyikan
+        matchUsia = false; 
       }
     }
-    // ============================================
+    
+    // === TAMBALAN UTAMA 2: BARIS INI JUGA IKUT TERHAPUS SEBELUMNYA ===
+    if (matchRegion && matchFeature && matchSearch && matchUsia) {
+      total++;
+    }
   });
 
-  // PENGAMANAN BARU: Cek dulu apakah elemen tombol benar-benar ada di HTML sebelum mengubah teksnya.
-  // Juga mendeteksi otomatis lewat data-filter jika ID tidak cocok.
   let btnAll = document.getElementById('btn-all');
   let btnImg = document.getElementById('btn-image') || document.querySelector('[data-filter="image"]');
   let btnArt = document.getElementById('btn-article') || document.querySelector('[data-filter="article"]');
@@ -503,14 +512,13 @@ function updateFeatureCounts() {
   if (btnImg) btnImg.textContent = 'Ber-Gambar';
   if (btnArt) btnArt.textContent = 'Ber-Artikel Wikipedia';
 
-  // Update input placeholder (bukan textContent)
-let searchInput = document.getElementById('search-input');
+  let searchInput = document.getElementById('search-input');
   if (searchInput) {
     searchInput.placeholder = `Menampilkan ${total} hasil (atau ketik di sini untuk mencari)`;
   }
 }
 
-// Fungsi Eksekutor & Algoritma Pengurutan Baru
+// Gantilah seluruh fungsi applyIntersectionFilter lama Anda dengan ini:
 function applyIntersectionFilter(preventZoom = false) {
   Cluster.clearLayers();
   let ol = document.getElementById('index-list');
@@ -538,7 +546,7 @@ function applyIntersectionFilter(preventZoom = false) {
       }
     }
 
-// === KODE BARU: Pemotong Data Peta & Daftar ===
+    // === Cek Filter Usia / Klaster ===
     let matchUsia = true;
     if (currentUsiaFilter === 'klaster_penting') {
       matchUsia = record.masukKlasterPenting === true;
@@ -552,7 +560,9 @@ function applyIntersectionFilter(preventZoom = false) {
         matchUsia = false;
       }
     }
-    // ==============================================
+    
+    // === TAMBALAN UTAMA 1: BARIS INI YANG SEBELUMNYA HILANG ===
+    return matchRegion && matchFeature && matchSearch && matchUsia;
 
   }).sort((a, b) => {
     // LOGIKA PENGURUTAN (Tinggal Abjad Saja)
@@ -565,9 +575,8 @@ function applyIntersectionFilter(preventZoom = false) {
   });
 
   if (validMarkers.length > 0) {
-Cluster.addLayers(validMarkers);
+    Cluster.addLayers(validMarkers);
     
-    // KUNCI PERBAIKAN: Hanya geser peta jika preventZoom bernilai salah (false)
     if (!preventZoom) {
       Map.fitBounds(Cluster.getBounds());
     }
