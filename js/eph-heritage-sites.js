@@ -390,20 +390,19 @@ function generateFilterSelect() {
     selectKombinasi.addEventListener('change', function() {
       let pilihan = this.value;
 
-      // 1. Reset kedua variabel ke kondisi bawaan (Pilih/Abjad)
+// 1. Reset kedua variabel ke kondisi bawaan (Pilih/Abjad)
       currentUsiaFilter = 'all';
       currentSortMode = 'alphabetical';
 
       // 2. Tentukan aksi berdasarkan opsi yang dipilih
-      if (pilihan === 'sort-age') {
-        currentSortMode = 'age'; // Hanya ubah urutan
+      if (pilihan === 'filter-usia-50') {
+        currentUsiaFilter = 'usia_50'; // SEKARANG MENGGUNAKAN FILTER, BUKAN SORT
       } 
       else if (pilihan === 'sort-alpha') {
-        currentSortMode = 'alphabetical'; // Hanya ubah urutan
+        currentSortMode = 'alphabetical';
       } 
       else if (pilihan === 'filter-klaster') {
-        currentUsiaFilter = 'klaster_penting'; // Aktifkan penyaring
-        // Urutan akan otomatis menggunakan abjad (karena reset di atas)
+        currentUsiaFilter = 'klaster_penting';
       }
       else if (pilihan === 'default') {
         // Biarkan saja, otomatis kembali ke semua data dan urut abjad
@@ -479,15 +478,19 @@ function updateFeatureCounts() {
 // === KODE BARU: Cek Filter Usia / Klaster ===
     let matchUsia = true;
     if (currentUsiaFilter === 'klaster_penting') {
-      matchUsia = record.masukKlasterPenting === true; // Hanya loloskan jika dia true
+      matchUsia = record.masukKlasterPenting === true;
     } 
-    // Tambahkan kondisi usia lain di sini jika Anda membuatnya (misal: else if abad 18)
-    // ============================================
-
-    // Ubah IF ini agar memasukkan matchUsia juga
-    if (matchRegion && matchFeature && matchSearch && matchUsia) {
-      total++;
+    else if (currentUsiaFilter === 'usia_50') {
+      if (record.rawTahunBerdiri) {
+        // Ambil 4 digit pertama (tahun) dan jadikan angka
+        let tahunBangunan = parseInt(record.rawTahunBerdiri.substring(0, 4));
+        let batasTahun = new Date().getFullYear() - 50; // Dinamis & otomatis
+        matchUsia = tahunBangunan <= batasTahun;
+      } else {
+        matchUsia = false; // Jika tidak ada data tahun, sembunyikan
+      }
     }
+    // ============================================
   });
 
   // PENGAMANAN BARU: Cek dulu apakah elemen tombol benar-benar ada di HTML sebelum mengubah teksnya.
@@ -540,31 +543,20 @@ function applyIntersectionFilter(preventZoom = false) {
     if (currentUsiaFilter === 'klaster_penting') {
       matchUsia = record.masukKlasterPenting === true;
     }
+    else if (currentUsiaFilter === 'usia_50') {
+      if (record.rawTahunBerdiri) {
+        let tahunBangunan = parseInt(record.rawTahunBerdiri.substring(0, 4));
+        let batasTahun = new Date().getFullYear() - 50;
+        matchUsia = tahunBangunan <= batasTahun;
+      } else {
+        matchUsia = false;
+      }
+    }
     // ==============================================
 
-    // Tambahkan matchUsia di pengembalian nilai ini
-    return matchRegion && matchFeature && matchSearch && matchUsia;
-
   }).sort((a, b) => {
-    
-    // LOGIKA PENGURUTAN
-    if (currentSortMode === 'age') {
-      let aHasYear = !!a.rawTahunBerdiri;
-      let bHasYear = !!b.rawTahunBerdiri;
-
-      if (aHasYear && bHasYear) {
-        return a.rawTahunBerdiri.localeCompare(b.rawTahunBerdiri);
-      } else if (aHasYear && !bHasYear) {
-        return -1;
-      } else if (!aHasYear && bHasYear) {
-        return 1;
-      } else {
-        return a.indexTitle.localeCompare(b.indexTitle);
-      }
-    } else {
-      return a.indexTitle.localeCompare(b.indexTitle);
-    }
-    
+    // LOGIKA PENGURUTAN (Tinggal Abjad Saja)
+    return a.indexTitle.localeCompare(b.indexTitle);    
   });
 
   validRecords.forEach(record => {
