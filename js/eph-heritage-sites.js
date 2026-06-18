@@ -314,7 +314,7 @@ function renderDynamicDataInPanel(qid) {
 
   // --- URUTAN 2: STATUS (KONDISI - P5817) ---
   if (record.kondisi) {
-    let capKondisi = record.kondisi.charAt(0).toUpperCase() + record.kondisi.slice(1);
+    let capKondisi = record.kondisi.charAt(0).toLowerCase() + record.kondisi.slice(1);
     let tautanSuntingKondisi = ` <a href="${wikiBaseUrl}#P5817" target="_blank" class="sunting-link" title="Sunting kondisi di Wikidata">[Sunting]</a>`;
     html += `<p>Kondisi: ${capKondisi}${tautanSuntingKondisi}</p>`;
   }
