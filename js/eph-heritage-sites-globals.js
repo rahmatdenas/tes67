@@ -7,14 +7,14 @@ const KUMPULAN_KUERI_0 = {
   WHERE {
     VALUES ?jenis { <PLACEHOLDER_JENIS> } 
     {
-      # Skenario 1: <PLACEHOLDER_WILAYAH_1>
+      <PLACEHOLDER_WILAYAH_1>
       ?p131Lokasi wdt:P131* ?provinsi .
       ?site wdt:P31 ?jenis ;
             wdt:P131 ?p131Lokasi .
     }
     UNION
     {
-      # Skenario 2: <PLACEHOLDER_WILAYAH_2>
+      <PLACEHOLDER_WILAYAH_2>
       ?site wdt:P31 ?jenis ;
             wdt:P131 ?p131Lokasi .
     }    
@@ -36,7 +36,7 @@ const KUMPULAN_KUERI_0 = {
     VALUES ?jenis { <PLACEHOLDER_JENIS> } 
 
     {
-      # Skenario 1: <PLACEHOLDER_WILAYAH_1>
+     <PLACEHOLDER_WILAYAH_1>
       ?p131Lokasi wdt:P131* ?provinsi .
       ?site wdt:P31 ?jenis ;
             wdt:P159 ?kantor .
@@ -44,7 +44,7 @@ const KUMPULAN_KUERI_0 = {
     }
     UNION
     {
-      # Skenario 2: <PLACEHOLDER_WILAYAH_2>
+      <PLACEHOLDER_WILAYAH_2>
       ?site wdt:P31 ?jenis ;
             wdt:P159 ?kantor .
       ?kantor wdt:P131 ?p131Lokasi .
