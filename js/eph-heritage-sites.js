@@ -124,15 +124,30 @@ function populateProvinceTypesData() {
   let namaKueri = (currentKategoriUtama === 'alam') ? 'general' : currentKategoriUtama;
   let baseQuery = KUMPULAN_KUERI_0[namaKueri];
   
-  // 3. Suntikkan Dropdown Wilayah
-let wilayahClause = '';
+// 3. Suntikkan Dropdown Wilayah
+  let wilayahClause = '';
   if (provInput === 'all') {
     wilayahClause = '{ SELECT ?provinsi WHERE { ?provinsi wdt:P31 wd:Q5098 . } }';
   } else {
-    // === TEKNIK JANGKAR GANDA ===
-    // Baris 1: Mencegah Timeout dengan membatasi area pencarian ?site
-    // Baris 2: Memaksa ?provinsi berisi daftar Kabupaten/Kota untuk Dropdown UI
-    wilayahClause = `?site wdt:P131+ ${provInput} . ?provinsi wdt:P131 ${provInput} .`;
+    // === SOLUSI "SMART INJECTION" (BEBAS TIMEOUT & DROPDOWN LENGKAP) ===
+    if (currentKategoriUtama === 'wilayah') {
+      // Khusus pencarian Kabupaten/Kota itu sendiri, kita langsung ikat
+      wilayahClause = `BIND(${provInput} AS ?provinsi)`;
+    } else {
+      // Untuk Bangunan, Alam, dan Pers:
+      // Paksa mesin mencari JENIS-nya dulu, baru menelusuri Kabupatennya!
+      let targetVar = (currentKategoriUtama === 'pers') ? '?kantor' : '?site';
+      let persLink  = (currentKategoriUtama === 'pers') ? '?site wdt:P159 ?kantor .' : '';
+      
+      wilayahClause = `
+        VALUES ?jenis_temp { ${inputTxt} }
+        ?site wdt:P31 ?jenis_temp .
+        ${persLink}
+        ${targetVar} wdt:P131+ ${provInput} .
+        ${targetVar} wdt:P131+ ?provinsi .
+        ?provinsi wdt:P131 ${provInput} .
+      `;
+    }
   }
   
   // 4. Rakit kueri final
