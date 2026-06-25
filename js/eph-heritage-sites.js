@@ -129,7 +129,7 @@ function populateProvinceTypesData() {
   if (provInput === 'all') {
     wilayahClause = '{ SELECT ?provinsi WHERE { ?provinsi wdt:P31 wd:Q5098 . } }';
   } else {
-    wilayahClause = `{ SELECT ?provinsi WHERE { ?provinsi wdt:P131 ${provInput} . } }`;
+wilayahClause = `BIND(${provInput} AS ?provinsi)`;
   }
   
   // 4. Rakit kueri final
