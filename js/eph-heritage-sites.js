@@ -828,7 +828,8 @@ function populateHistoricalImagesData(qid) {
 
   record.vicinityImages = [];
   record.pastImage = undefined;
-  record.interiorImage = undefined; // Inisialisasi variabel baru
+  record.interiorImage = undefined; 
+  record.commonsCat = undefined; // <-- Siapkan wadahnya di sini
 
   return queryWdqsThenProcess(
     queryStr,
@@ -851,13 +852,17 @@ function populateHistoricalImagesData(qid) {
         }
       }
 
-      // === PENANGKAP PEMANDANGAN DALAM (INTERIOR) ===
       if ('interiorImage' in result) {
         if (!record.interiorImage) { 
           let filename = extractImageFilename(result.interiorImage);
           let captionText = result.interiorCaption ? result.interiorCaption.value : '';
           record.interiorImage = { file: filename, caption: captionText };
         }
+      }
+      
+      // === TANGKAP COMMONS CAT ===
+      if ('commonsCat' in result) {
+        record.commonsCat = result.commonsCat.value;
       }
     },
     function() {
@@ -875,14 +880,13 @@ function renderHistoricalImagesInPanel(qid) {
 
   let html = '';
   
-  // 1. Tambahkan parameter 'teksPengganti' di sini
+  // Fungsi pembuat blok gambar beserta teks penggantinya
   function buildImageBlock(imgObj, teksPengganti) {
-    let block = '<div class="arsip-block" style="overflow: hidden;">';
+    let block = '<div class="arsip-block" style="overflow: hidden; margin-bottom: 10px;">';
     block += generateFigure(imgObj.file);
     if (imgObj.caption && imgObj.caption.trim() !== '') {
       block += `<div class="article main-text"><p>${imgObj.caption}</p></div>`;
     } else {
-      // 2. Cetak teks pengganti sesuai yang dikirim
       block += `<div class="article main-text nodata"><p>${teksPengganti}</p></div>`;
     }
     block += '</div>';
@@ -891,27 +895,47 @@ function renderHistoricalImagesInPanel(qid) {
 
   // Render Pemandangan Masa Lalu
   if (record.pastImage) {
-    // 3. Kirim teks khusus untuk Masa Lalu
     html += buildImageBlock(record.pastImage, 'Suasana/bentuk/tampilan sebelumnya');
   }
 
-  // === RENDER PEMANDANGAN DALAM (INTERIOR) ===
+  // Render Pemandangan Dalam
   if (record.interiorImage) {
+    html += '<h3 style="margin: 15px 0 5px; font-size: 15px; color:#555;">Pemandangan Dalam</h3>';
     html += buildImageBlock(record.interiorImage, 'Pemandangan di dalam');
   }
   
   // Render Pemandangan Sekitar
   if (record.vicinityImages && record.vicinityImages.length > 0) {
+    html += '<h3 style="margin: 15px 0 5px; font-size: 15px; color:#555;">Lingkungan Sekitar</h3>';
     record.vicinityImages.forEach(imgObj => {
-      // 5. Kirim teks khusus untuk Sekitar
       html += buildImageBlock(imgObj, 'Objek di sekitar');
     });
   }
 
+  // === RENDER TAUTAN WIKIMEDIA COMMONS ===
+  if (record.commonsCat) {
+    html += '<h2 style="margin: 25px 0 10px;">Galeri lainnya</h2>';
+    html += 
+      '<p class="wikipedia-link" style="margin-bottom: 0;">' +
+        `<a href="https://commons.wikimedia.org/wiki/Category:${encodeURIComponent(record.commonsCat)}" target="_blank">` +
+          '<img src="img/wikicommons_tiny_logo.png" alt="" />' +
+          '<span>Lihat di Wikimedia Commons</span>' +
+        '</a>' +
+      '</p>';
+  }
+
+  // === PERAKITAN AKHIR (Cetak Judul Utama) ===
   if (html !== '') {
     let wikiUrlGaleri = `https://www.wikidata.org/wiki/${qid}#P18`;
     let tautanSuntingGaleri = `<a href="${wikiUrlGaleri}" target="_blank" class="sunting-link" title="Sunting data galeri di Wikidata" aria-label="Sunting data galeri di Wikidata"></a>`;
-    container.innerHTML = `<h2 style="margin-bottom:15px;">Galeri ${tautanSuntingGaleri}</h2>` + html;
+    
+    let judulGaleriUtama = '';
+    // Hanya cetak judul "Galeri" utama jika ada foto yang berhasil ditarik
+    if (record.pastImage || record.interiorImage || (record.vicinityImages && record.vicinityImages.length > 0)) {
+      judulGaleriUtama = `<h2 style="margin-bottom:15px;">Galeri ${tautanSuntingGaleri}</h2>`;
+    }
+    
+    container.innerHTML = judulGaleriUtama + html;
     container.classList.remove('loading');
   } else {
     container.innerHTML = '';
