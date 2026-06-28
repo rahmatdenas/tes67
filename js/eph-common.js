@@ -134,7 +134,7 @@ if (activeXhrs.length > 0) {
   let searchInput = document.getElementById('search-input');
   if (searchInput) {
     searchInput.value = '';
-    searchInput.placeholder = 'Ketik yang ingin dicari...'; // Teks netral
+    searchInput.placeholder = 'Belum ada hasil...'; // Teks netral
   }
 
   // D. Matikan semua tombol filter (Gambar/Artikel), dan nyalakan tombol "Semua Hasil"
