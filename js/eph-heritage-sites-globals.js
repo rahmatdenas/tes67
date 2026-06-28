@@ -17,8 +17,8 @@ const KUMPULAN_KUERI_0 = {
     <PLACEHOLDER_UNION_EKSTRA>
     
     OPTIONAL { 
-      ?site p:P571 ?inceptionStmt .
-      ?inceptionStmt psv:P571 ?inceptionNode .
+      ?site p:<PLACEHOLDER_PROP_TAHUN> ?inceptionStmt .
+      ?inceptionStmt psv:<PLACEHOLDER_PROP_TAHUN> ?inceptionNode .
       ?inceptionNode wikibase:timeValue ?tahunBerdiriMentah ;
                      wikibase:timePrecision ?tahunPresisi .
     }
