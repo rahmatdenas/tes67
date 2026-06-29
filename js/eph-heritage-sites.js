@@ -560,7 +560,11 @@ const labelKamus = {
     pendiriList: 'Pendiri', penerbit: 'Penerbit', bahanList: 'Bahan utama',
     caraList: 'Cara pembuatan', penutur: 'Jumlah penutur', tglWafat: 'Tanggal wafat',
     pekerjaanList: 'Pekerjaan', pegunungan: 'Bagian dari', korban: 'Korban jiwa',
-    agamaList: 'Agama', bagianDari: 'Bagian dari'
+    agamaList: 'Agama', bagianDari: 'Bagian dari',
+  pencipta: 'Pencipta',
+    panjang: 'Panjang',
+    tinggi: 'Tinggi',
+    aksaraList: 'Sistem penulisan'
   };
 
   let urlWikibooks = null;
@@ -608,6 +612,11 @@ else if (key === 'kepalaDaerah') {
       }
       else if (key === 'kapasitas' || key === 'korban') {
         formattedValue = parseInt(rawValue).toLocaleString('id-ID');
+      }
+        else if (key === 'panjang' || key === 'tinggi') {
+        let [angka, satuan] = rawValue.split('|');
+        let angkaRapi = parseFloat(angka).toLocaleString('id-ID');
+        formattedValue = satuan ? `${angkaRapi} ${satuan}` : angkaRapi;
       }
         else if (key === 'ketinggian') {
         formattedValue = parseInt(rawValue).toLocaleString('id-ID') + " mdpl";
