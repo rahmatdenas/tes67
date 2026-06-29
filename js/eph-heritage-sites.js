@@ -324,7 +324,6 @@ function populateProvinceTypesData() {
       record.areaTags.add(provQid);
       
       if ('p131LokasiLabel' in result && result.p131LokasiLabel.value) record.lokasiSpesifik = result.p131LokasiLabel.value;
-      if ('p131Image' in result && result.p131Image.value) record.lokasiImage = extractImageFilename(result.p131Image);
       
       if (!record.tahunBerdiri && result.tahunBerdiriMentah && result.tahunBerdiriMentah.value) {
         let precision = result.tahunPresisi ? result.tahunPresisi.value : 9;
