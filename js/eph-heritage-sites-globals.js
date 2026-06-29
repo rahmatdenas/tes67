@@ -3,24 +3,31 @@
 const BASE_TITLE = 'WikiJelajah';
 
 const KUMPULAN_KUERI_0 = {
-  'universal': `SELECT DISTINCT ?site ?siteLabel ?p131Lokasi ?p131LokasiLabel ?provinsi (SAMPLE(?tahunVal) AS ?tahunBerdiriMentah) (SAMPLE(?tahunPrec) AS ?tahunPresisi) WHERE {
+  'universal': `SELECT DISTINCT ?siteQid ?siteLabel ?provinsiQid ?provinsiLabel ?p131LokasiLabel ?tahunBerdiriMentah ?tahunPresisi
+  WHERE {
+    VALUES ?jenis { <PLACEHOLDER_JENIS> } 
+    
     <PLACEHOLDER_KURUNG_BUKA>
-      VALUES ?jenis { <PLACEHOLDER_JENIS> }
-      ?site wdt:P31 ?jenis .
-      ?site wdt:<PLACEHOLDER_PROP_LOKASI> ?p131Lokasi .
-      <PLACEHOLDER_HIERARKI_LOKASI>
       <PLACEHOLDER_WILAYAH_1>
-    <PLACEHOLDER_UNION_EKSTRA>
+      ?site wdt:P31 ?jenis ;
+            wdt:<PLACEHOLDER_PROP_LOKASI> ?p131Lokasi .
+      <PLACEHOLDER_HIERARKI_LOKASI>
     <PLACEHOLDER_KURUNG_TUTUP>
     
-    OPTIONAL {
-      ?site p:<PLACEHOLDER_PROP_TAHUN> ?tahunStmt .
-      ?tahunStmt psv:<PLACEHOLDER_PROP_TAHUN> ?tahunNode .
-      ?tahunNode wikibase:timeValue ?tahunVal ;
-                 wikibase:timePrecision ?tahunPrec .
+    <PLACEHOLDER_UNION_EKSTRA>
+    
+    OPTIONAL { 
+      ?site p:<PLACEHOLDER_PROP_TAHUN> ?inceptionStmt .
+      ?inceptionStmt psv:<PLACEHOLDER_PROP_TAHUN> ?inceptionNode .
+      ?inceptionNode wikibase:timeValue ?tahunBerdiriMentah ;
+                     wikibase:timePrecision ?tahunPresisi .
     }
+    
+    BIND(SUBSTR(STR(?site), 32) AS ?siteQid) .
+    BIND(SUBSTR(STR(?provinsi), 32) AS ?provinsiQid) .
+    
     SERVICE wikibase:label { bd:serviceParam wikibase:language "id". }
-  } GROUP BY ?site ?siteLabel ?p131Lokasi ?p131LokasiLabel ?provinsi`,
+  }`,
 
   // === TEMPLAT BARU: LOKASI OPTIONAL TAPI WAJIB INDONESIA ===
 'khusus_negara_all': `SELECT DISTINCT ?siteQid ?siteLabel ?provinsiQid ?provinsiLabel ?p131LokasiLabel ?tahunBerdiriMentah ?tahunPresisi
