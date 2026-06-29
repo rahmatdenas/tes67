@@ -521,7 +521,7 @@ optgroup option { padding-left: 10px; }
 
 /* --- Designations --- */
 #details .designations {
-  margin: 0;
+  margin:-5px 0 0 0;
   padding: 0 0 10px;
   overflow: hidden;
 }
