@@ -194,7 +194,7 @@ if (cek(['Q40080'])) return 'Pantai';
   if (cek(['Q4989906', 'Q321053', 'Q179700', 'Q170980', 'Q5003624'])) return 'Monumen, patung, & memorial';
   if (cek(['Q178743', 'Q1640824'])) return 'Prasasti';
   if (cek(['Q839954', 'Q193475'])) return 'Situs arkeologi';
-  if (cek(['Q220659', 'Q860861'])) return 'Artefak';
+  if (cek(['Q220659', 'Q860861', 'Q193475'])) return 'Artefak';
 
   return 'Objek'; 
 }
