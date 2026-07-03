@@ -236,61 +236,79 @@ function populateProvinceTypesData() {
   currentKategoriUtama = tentukanKategoriKueri(inputTxt);
   currentNamaKlaster = dapatkanNamaKlaster(inputTxt); 
   currentNamaWilayah = provDropdown.options[provDropdown.selectedIndex].text;
-
-let brandingDesc = document.getElementById('branding-desc');
+  
+  let brandingDesc = document.getElementById('branding-desc');
   if (brandingDesc) {
     brandingDesc.textContent = `${currentNamaKlaster} di ${currentNamaWilayah}`;
   }
-  
-  // 2. RENDER LOADING LANGSUNG DI SINI SECARA UTUH
+
+  // 2. Render Loading
   let indexList = document.getElementById('index-list');
   if (indexList) {
-    indexList.innerHTML = `
-      <div style="padding: 40px 20px; text-align: center; line-height: 1.6;">
-        <h3 id="loading-text" style="margin-bottom: 10px; margin-top:0; color: #333;">
-          Sedang Menarik Data ${currentNamaKlaster} di ${currentNamaWilayah}...
-        </h3>
-        <p style="color: #666; font-size:14px; margin-bottom: 25px;">Mohon tunggu sebentar, Wikidata sedang mencari dan menyusun daftar entitas untuk Anda.</p>
-        <div class="loader" style="margin: 0 auto; width: 40px; height: 40px; border-width: 4px;"></div>
-      </div>
-    `;
+    indexList.innerHTML = `... (kode loading Anda) ...`;
   }
   
+  // === LOGIKA PEMILIHAN TEMPLATE KUERI ===
   let baseQuery = KUMPULAN_KUERI_0['universal'];
+  
+  // Jika pengguna memilih mode "Apapun", ganti template dasarnya!
+  if (inputTxt.toLowerCase() === 'apapun') {
+    baseQuery = KUMPULAN_KUERI_0['apapun'];
+    currentNamaKlaster = 'Berbagai Objek'; // Nama kosmetik untuk UI
+  }
+
   let propLokasi = dapatkanPropertiWikidata(currentNamaKlaster);
   let propTahun = dapatkanPropertiTahun(currentNamaKlaster);
   let wilayahClause1 = '';
   let unionEkstra = ''; 
-let hierarkiLokasi = '?l wdt:P131* ?p .'; 
-    let kurungBuka = '';
+  let hierarkiLokasi = '?l wdt:P131* ?p .'; 
+  let kurungBuka = '';
   let kurungTutup = '';
+  
   const klasterKhususNasional = ['Wilayah Administratif', 'Gempa bumi dan tsunami', 'Peristiwa lainnya', 'Publikasi', 'Lukisan'];
   let isKhususNasional = klasterKhususNasional.includes(currentNamaKlaster);
-let filterNasional = '?s wdt:P17 wd:Q252 .';
-if (currentNamaKlaster === 'Publikasi') {
-  filterNasional = '?s wdt:P407 wd:Q9240 .';
-}
-// ...
-if (provInput === 'all') {
-  wilayahClause1 = '?p wdt:P31 wd:Q5098 .';
-  if (isKhususNasional) {
-    baseQuery = KUMPULAN_KUERI_0['khusus_negara_all'];
+  let filterNasional = '?s wdt:P17 wd:Q252 .';
+  
+  if (currentNamaKlaster === 'Publikasi') {
+    filterNasional = '?s wdt:P407 wd:Q9240 .';
   }
-} else {
+
+  if (provInput === 'all') {
+    wilayahClause1 = '?p wdt:P31 wd:Q5098 .';
+    
+    // Cegah penimpaan ke 'khusus_negara_all' jika sedang dalam mode 'apapun'
+    if (isKhususNasional && inputTxt.toLowerCase() !== 'apapun') {
+      baseQuery = KUMPULAN_KUERI_0['khusus_negara_all'];
+    }
+  } else {
     wilayahClause1 = `?p wdt:P131 ${provInput}.`;
     let wilayahClause2 = `BIND(${provInput} AS ?p) BIND(${provInput} AS ?l)`; 
     
     kurungBuka = '{';
     kurungTutup = '}';
     
+    // Union Ekstra tetap ada, tapi hanya memengaruhi yang Universal
     unionEkstra = `
     UNION {
       ${wilayahClause2}
       ?s wdt:P31 ?j ;
          wdt:${propLokasi} ?l .
     }`;
-}
+    
+    // Jika mode apapun, kita sederhanakan unionnya agar tidak bocor ke filter P31
+    if (inputTxt.toLowerCase() === 'apapun') {
+       unionEkstra = `
+       UNION {
+         ${wilayahClause2}
+         ?s wdt:P17 wd:Q252 ;
+            wdt:P625 [] ;
+            wdt:P18 [] ;
+            wdt:P131 ?l .
+       }`;
+    }
+  }
   
+  // Replace string seperti biasa (placeholder <PLACEHOLDER_JENIS> akan hilang sendirinya jika tidak ada di template 'apapun')
   let dynamicQuery = baseQuery
     .replace(/<PLACEHOLDER_FILTER_NASIONAL>/g, filterNasional)
     .replace(/<PLACEHOLDER_KURUNG_BUKA>/g, kurungBuka)  
