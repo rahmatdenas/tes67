@@ -399,12 +399,12 @@ function processHashChange() {
     // BERANDA: URL bersih, setel ulang aplikasi
     history.replaceState(null, null, window.location.pathname); // Hilangkan '#' dari address bar
     resetApp(); 
-    document.title = 'Mulai Eksplorasi – ' + BASE_TITLE;
+    document.title = 'Mulai – ' + BASE_TITLE;
     displayPanelContent('landing');
   }
   else if (fragment === 'about') {
     // TENTANG
-    document.title = 'About – ' + BASE_TITLE;
+    document.title = 'Tentang – ' + BASE_TITLE;
     displayPanelContent('about');
   }
   else {
